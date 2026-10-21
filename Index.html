@@ -1,0 +1,833 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>La Mole Gourmande</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Concept : une journée de service dans un food-truck. Auvent rayé, carte à la craie, bons de commande en police mono. Un niveau = un moment de la journée. */
+:root{
+  --bg:#EDF3F1; --surface:#FFFFFF; --surface-2:#E1EBE8; --ink:#11262B; --muted:#4B6368; --line:#C3D3CF;
+  --band:#0B6E75; --band-ink:#FFFFFF; --accent:#0B6E75; --on-accent:#FFFFFF;
+  --signal:#C23A22; --awning-b:#FFFFFF; --butter:#F2C14E; --butter-ink:#2A2000;
+  --board:#17353A; --chalk:#F1F5F3; --chalk-dim:#B9CCC8; --frame:#9A6A3A; --tyre:#11262B;
+  --ok:#17743F; --ok-bg:#DDF1E5; --bad:#B5301F; --bad-bg:#FBE3DE;
+  --f-display:'Bricolage Grotesque','Trebuchet MS',system-ui,sans-serif;
+  --f-body:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'DM Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1A1D; --surface:#14292D; --surface-2:#1B363B; --ink:#E8F1EF; --muted:#9DB5B2; --line:#2A4348;
+    --band:#0F4F55; --accent:#5CC8CF; --on-accent:#06181A;
+    --signal:#FF7A5C; --awning-b:#DCE8E5; --frame:#6E4A28; --tyre:#2B474C;
+    --ok:#6FDDA0; --ok-bg:#123824; --bad:#FF9C8E; --bad-bg:#3B1B17;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1A1D; --surface:#14292D; --surface-2:#1B363B; --ink:#E8F1EF; --muted:#9DB5B2; --line:#2A4348;
+  --band:#0F4F55; --accent:#5CC8CF; --on-accent:#06181A;
+  --signal:#FF7A5C; --awning-b:#DCE8E5; --frame:#6E4A28; --tyre:#2B474C;
+  --ok:#6FDDA0; --ok-bg:#123824; --bad:#FF9C8E; --bad-bg:#3B1B17;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1.0625rem;line-height:1.55;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--band);z-index:10}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.08;letter-spacing:-.01em}
+p{margin:0 0 .9rem}
+i{font-style:italic}
+sub{font-size:.72em;line-height:0}
+.f{white-space:nowrap}
+.in{max-width:56rem;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.bar :focus-visible{outline-color:var(--butter)}
+.kick{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 .5rem}
+
+/* En-tête */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--band);color:var(--band-ink)}
+.bar .in{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding-block:.55rem}
+.brand{font-family:var(--f-display);font-weight:800;font-size:1.05rem;letter-spacing:-.01em;white-space:nowrap}
+.bar-r{display:flex;align-items:center;gap:.75rem}
+.prog{font-family:var(--f-mono);font-size:.8rem;opacity:.9}
+.pips{display:flex;gap:.35rem}
+.pip{width:2rem;height:2rem;border-radius:50%;border:2px solid rgba(255,255,255,.6);background:transparent;color:var(--band-ink);font-family:var(--f-mono);font-size:.82rem;cursor:pointer;padding:0;display:grid;place-items:center}
+.pip.is-done{background:var(--butter);border-color:var(--butter);color:var(--butter-ink)}
+.pip.is-locked{opacity:.55}
+.awning{height:12px;background:repeating-linear-gradient(90deg,var(--signal) 0 24px,var(--awning-b) 24px 48px)}
+
+/* Accueil */
+.hero{padding-block:2.5rem 3rem}
+.hero .in{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:2rem 2.5rem;align-items:center}
+.hero h1{font-size:clamp(2.6rem,9vw,4.8rem);font-weight:800;letter-spacing:-.03em}
+.lede{font-size:1.18rem;max-width:34rem;margin:1rem 0 1.4rem}
+.truck{width:100%;height:auto;display:block}
+.t-body{fill:var(--band)} .t-glass{fill:var(--bg)} .t-hatch{fill:var(--surface-2)}
+.t-a{fill:var(--signal)} .t-b{fill:var(--awning-b)} .t-counter{fill:var(--butter)}
+.t-tyre{fill:var(--tyre)} .t-hub{fill:var(--butter)} .t-ground{fill:var(--line)}
+.t-text{font-family:var(--f-display);font-weight:800;font-size:11px;fill:var(--band-ink);letter-spacing:.04em}
+.carte{grid-column:1/-1;background:var(--board);color:var(--chalk);border:6px solid var(--frame);border-radius:6px;padding:1.1rem 1.1rem 1rem}
+.carte h2{font-size:1.35rem;color:var(--chalk)}
+.carte ol{list-style:none;margin:.6rem 0 0;padding:0}
+.carte button{display:grid;grid-template-columns:4.4rem minmax(0,1fr);gap:.1rem .9rem;width:100%;padding:.6rem .2rem;background:none;border:0;border-bottom:1px dashed rgba(241,245,243,.3);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.carte li:last-child button{border-bottom:0}
+.carte .tm{font-family:var(--f-mono);color:var(--butter);grid-row:span 2}
+.carte .tt{font-family:var(--f-display);font-weight:700;font-size:1.1rem}
+.carte .sk{color:var(--chalk-dim);font-size:.93rem}
+.carte li.is-done .tt::after{content:" ✓";color:var(--butter)}
+
+/* Boutons */
+.btn{font:inherit;font-weight:700;background:var(--accent);color:var(--on-accent);border:2px solid var(--accent);border-radius:999px;padding:.6rem 1.2rem;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.link{background:none;border:0;padding:0;font:inherit;color:var(--accent);text-decoration:underline;cursor:pointer}
+
+/* Niveaux */
+.level{padding-block:3rem;border-top:2px dashed var(--line);scroll-margin-top:4.5rem}
+.lvl-head{display:flex;align-items:center;flex-wrap:wrap;gap:.4rem 1.4rem;margin-bottom:1.4rem}
+.clock{font-family:var(--f-display);font-weight:800;font-size:clamp(2.7rem,10vw,4.2rem);line-height:1;letter-spacing:-.03em;color:var(--accent);margin:0;white-space:nowrap}
+.lvl-head h2{font-size:clamp(1.7rem,5vw,2.4rem)}
+.lock-note{padding:1rem 1.2rem;border:2px dashed var(--line);border-radius:6px;color:var(--muted);margin:0}
+.say{font-size:1.1rem;margin:0 0 1.1rem}
+.who{font-family:var(--f-mono);font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;background:var(--butter);color:var(--butter-ink);padding:.12rem .5rem;border-radius:3px;margin-right:.55rem}
+.goal{margin:1.2rem 0;padding:.9rem 1.1rem;background:var(--surface);border:1px solid var(--line);border-radius:4px}
+.goal .tag{font-family:var(--f-mono);font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);display:block;margin-bottom:.25rem}
+.goal p{margin:0}
+.lvl-body h3{font-size:1.3rem;margin:1.8rem 0 .6rem}
+.rule-list{margin:.4rem 0 1rem;padding-left:1.25rem}
+.rule-list li{margin-bottom:.3rem}
+.recap{margin:1.8rem 0 1rem;padding:1.1rem 1.25rem;background:var(--butter);color:var(--butter-ink);border-radius:4px}
+.recap .tag{font-family:var(--f-mono);font-size:.76rem;text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:.3rem}
+.recap p{margin:0}
+.next{margin-top:1rem}
+
+/* Bons / tickets */
+.ticket{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:1rem 1.1rem 1.1rem;margin-block:1rem}
+.t-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:.2rem .8rem;font-family:var(--f-mono);font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px dashed var(--line);padding-bottom:.6rem;margin-bottom:.9rem}
+.eq{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem .8rem;font-size:1.25rem}
+.sp{display:inline-flex;align-items:center;gap:.35rem}
+.step{width:2.5rem;height:2.5rem;border-radius:50%;border:2px solid var(--accent);background:transparent;color:var(--accent);font:inherit;font-weight:700;font-size:1.2rem;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0}
+.step:hover{background:var(--accent);color:var(--on-accent)}
+.coef{min-width:1.6rem;text-align:center;font-family:var(--f-mono);font-weight:500;font-size:1.3rem}
+.op{font-family:var(--f-mono);color:var(--muted)}
+.cap{font-size:.86rem;color:var(--muted);margin:.9rem 0 .4rem}
+.tally{display:flex;flex-wrap:wrap;gap:.5rem}
+.at{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--f-mono);padding:.3rem .7rem;border-radius:4px;border:1px solid var(--line);background:var(--bg)}
+.at.ok{border-color:var(--ok);color:var(--ok);background:var(--ok-bg)}
+.at.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-bg)}
+.stamp{display:inline-block;margin-top:.7rem;font-family:var(--f-mono);font-weight:500;text-transform:uppercase;letter-spacing:.12em;border:3px solid var(--signal);color:var(--signal);padding:.15rem .6rem;border-radius:4px;transform:rotate(-3deg)}
+.ord{display:flex;flex-wrap:wrap;gap:.6rem 2rem;margin:0}
+.ord dt{font-size:.9rem;color:var(--muted)}
+.ord dd{margin:0;font-family:var(--f-mono);font-size:1.4rem;font-weight:500}
+
+/* Retours */
+.fb{margin:.5rem 0 0;padding:.5rem .8rem;border-radius:6px;font-size:.98rem}
+.fb:empty{display:none}
+.fb.ok{background:var(--ok-bg);color:var(--ok)}
+.fb.bad{background:var(--bad-bg);color:var(--bad)}
+.fb.info{background:var(--surface-2);color:var(--ink)}
+
+/* Questions */
+.q{padding:1rem 0;border-top:1px dashed var(--line)}
+.q-text{margin:0 0 .55rem;font-weight:700}
+.qrow{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+.inp{width:7.5rem;font-family:var(--f-mono);font-size:1.1rem;padding:.55rem .7rem;border:2px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.q.is-done .inp{border-color:var(--ok)}
+.unit{font-family:var(--f-mono);color:var(--muted)}
+.opts{display:flex;flex-wrap:wrap;gap:.5rem}
+.opt{font:inherit;font-family:var(--f-mono);font-size:1.05rem;padding:.5rem 1rem;border:2px solid var(--accent);background:transparent;color:var(--accent);border-radius:6px;cursor:pointer}
+.opt:hover:not(:disabled){background:var(--accent);color:var(--on-accent)}
+.opt:disabled{opacity:.55;cursor:default}
+
+/* Laboratoire (curseurs, barres, tableaux) */
+.lab{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:1rem 1.1rem;margin-block:1rem}
+.lab label{display:block;font-weight:700;margin-bottom:.3rem}
+.lab input[type=range]{width:100%;max-width:30rem;accent-color:var(--accent)}
+.lab output{display:inline-block;font-family:var(--f-mono);margin-left:.6rem}
+.rx{font-size:1.3rem;margin:0 0 .8rem}
+.food{margin:.8rem 0 0;padding:.5rem .8rem;background:var(--surface-2);border-radius:6px}
+.brow{display:grid;grid-template-columns:5.2rem minmax(0,1fr) 5rem;gap:.6rem;align-items:center;margin-block:.35rem;font-family:var(--f-mono);font-size:.95rem}
+.track{display:block;height:1.1rem;background:var(--surface-2);border-radius:3px;overflow:hidden}
+.fill{display:block;height:100%;transition:width .25s}
+.fill.R{background:var(--accent)} .fill.P{background:var(--signal)}
+.bval{text-align:right}
+.legend{font-size:.86rem;color:var(--muted);margin:.6rem 0 0}
+.legend b{display:inline-block;width:.8rem;height:.8rem;border-radius:2px;vertical-align:-.05em;margin-right:.25rem}
+.tw{overflow-x:auto;margin-block:1rem}
+table.av{border-collapse:collapse;width:100%;min-width:30rem;font-variant-numeric:tabular-nums}
+.av th,.av td{padding:.55rem .7rem;border:1px solid var(--line);text-align:center}
+.av thead th{background:var(--surface-2);font-family:var(--f-mono);font-weight:500}
+.av thead th.R{color:var(--accent)}
+.av thead th.P{color:var(--signal)}
+.av tbody th{text-align:left;font-weight:700;background:var(--surface)}
+.av td{font-family:var(--f-mono);background:var(--surface)}
+.av td.neg{background:var(--bad-bg);color:var(--bad)}
+.av small{display:block;font-family:var(--f-mono);font-size:.72rem;font-weight:400;color:var(--muted)}
+.av td.neg small{color:var(--bad)}
+.av tr.fin th,.av tr.fin td{border-top:3px double var(--ink)}
+.molar{display:flex;flex-wrap:wrap;gap:.4rem 1.6rem;margin:.6rem 0 0;padding:0;list-style:none;font-family:var(--f-mono)}
+.molar b{font-weight:500;color:var(--accent)}
+.bal{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:.8rem;margin-top:.6rem}
+.bal .m{font-family:var(--f-mono);font-size:1.05rem;margin:0}
+.scale{width:100%;max-width:22rem;height:auto;display:block}
+.s-ink{fill:var(--ink)} .s-line{stroke:var(--ink);stroke-width:1.5;fill:none}
+.s-pan{fill:var(--accent)} .s-text{font-family:var(--f-mono);font-size:13px;fill:var(--ink)}
+details.help{margin:1rem 0;padding:.6rem 1rem;border:1px dashed var(--line);border-radius:4px}
+details.help summary{cursor:pointer;font-weight:700}
+.sparse{margin-top:1rem}
+
+/* Addition finale */
+.fin{padding-block:3rem 3.5rem;border-top:2px dashed var(--line)}
+.fin h2{font-size:clamp(1.9rem,6vw,2.8rem);margin-bottom:1rem}
+.receipt{max-width:26rem;margin:1.4rem 0;padding:1.1rem 1.2rem;background:var(--surface);border:1px solid var(--line);font-family:var(--f-mono);font-size:.92rem}
+.receipt .r-head{text-align:center;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px dashed var(--line);padding-bottom:.6rem;margin-bottom:.6rem}
+.receipt ul{list-style:none;margin:0;padding:0}
+.receipt li{display:flex;align-items:baseline;gap:.4rem;padding:.2rem 0}
+.receipt li span:first-child{flex:0 1 auto}
+.receipt .lead{flex:1;border-bottom:2px dotted var(--line);min-width:1rem}
+.receipt .r-foot{text-align:center;margin:.8rem 0 0;border-top:1px dashed var(--line);padding-top:.6rem}
+footer{padding-block:1.4rem 2rem;border-top:2px dashed var(--line);color:var(--muted);font-size:.9rem}
+footer .in{display:flex;flex-wrap:wrap;gap:.6rem 1.6rem;align-items:center}
+footer label{display:inline-flex;gap:.45rem;align-items:center;cursor:pointer}
+
+@media (max-width:760px){
+  .hero .in{grid-template-columns:minmax(0,1fr)}
+  .truck{max-width:22rem}
+}
+@media (max-width:600px){ .prog{display:none} }
+@media (max-width:440px){
+  .brand{font-size:.95rem}
+  .brow{grid-template-columns:4.3rem minmax(0,1fr) 4.2rem}
+}
+@media (prefers-reduced-motion:reduce){ .fill{transition:none} }
+</style>
+
+<header class="bar">
+  <div class="in">
+    <span class="brand">La Mole Gourmande</span>
+    <div class="bar-r">
+      <span class="prog" id="prog">0 / 5</span>
+      <nav class="pips" aria-label="Les cinq services">
+        <button class="pip" type="button" data-go="n1">1</button>
+        <button class="pip" type="button" data-go="n2">2</button>
+        <button class="pip" type="button" data-go="n3">3</button>
+        <button class="pip" type="button" data-go="n4">4</button>
+        <button class="pip" type="button" data-go="n5">5</button>
+      </nav>
+    </div>
+  </div>
+</header>
+<div class="awning" aria-hidden="true"></div>
+
+<main id="main">
+
+<section class="hero" id="accueil">
+  <div class="in">
+    <div>
+      <p class="kick">Chimie · Seconde · Stœchiométrie</p>
+      <h1>La Mole Gourmande</h1>
+      <p class="lede">Le food-truck d'Inès cuisine avec du gaz, du charbon et une pile à hydrogène. Elle cherche quelqu'un qui sache compter les atomes pour ne rien gaspiller. Cinq services, chacun plus chargé que le précédent, te préparent au poste.</p>
+      <button class="btn" type="button" data-go="n1">Ouvrir le camion</button>
+    </div>
+    <svg class="truck" viewBox="0 0 320 180" role="img" aria-label="Illustration d'un food-truck avec un auvent rayé">
+      <rect class="t-ground" x="0" y="165" width="320" height="3"/>
+      <rect class="t-body" x="20" y="44" width="212" height="102" rx="10"/>
+      <rect class="t-body" x="228" y="78" width="74" height="68" rx="8"/>
+      <rect class="t-glass" x="262" y="86" width="30" height="26" rx="4"/>
+      <rect class="t-hatch" x="44" y="68" width="154" height="46" rx="3"/>
+      <rect class="t-a" x="40" y="56" width="22" height="14"/>
+      <rect class="t-b" x="62" y="56" width="22" height="14"/>
+      <rect class="t-a" x="84" y="56" width="22" height="14"/>
+      <rect class="t-b" x="106" y="56" width="22" height="14"/>
+      <rect class="t-a" x="128" y="56" width="22" height="14"/>
+      <rect class="t-b" x="150" y="56" width="22" height="14"/>
+      <rect class="t-a" x="172" y="56" width="22" height="14"/>
+      <rect class="t-b" x="194" y="56" width="8" height="14"/>
+      <rect class="t-counter" x="40" y="114" width="162" height="6"/>
+      <text class="t-text" x="121" y="137" text-anchor="middle">LA MOLE GOURMANDE</text>
+      <circle class="t-tyre" cx="80" cy="148" r="17"/><circle class="t-hub" cx="80" cy="148" r="7"/>
+      <circle class="t-tyre" cx="256" cy="148" r="17"/><circle class="t-hub" cx="256" cy="148" r="7"/>
+    </svg>
+    <div class="carte">
+      <h2>La carte du jour</h2>
+      <ol id="carte">
+        <li><button type="button" data-go="n1"><span class="tm">7 h 30</span><span class="tt">Mise en place</span><span class="sk">Équilibrer une équation de réaction</span></button></li>
+        <li><button type="button" data-go="n2"><span class="tm">10 h 00</span><span class="tt">Les portions</span><span class="sk">Relier les quantités de matière avec les coefficients</span></button></li>
+        <li><button type="button" data-go="n3"><span class="tm">12 h 15</span><span class="tt">Rupture de stock</span><span class="sk">Réactif limitant et tableau d'avancement</span></button></li>
+        <li><button type="button" data-go="n4"><span class="tm">15 h 00</span><span class="tt">La balance</span><span class="sk">Passer des masses aux quantités de matière</span></button></li>
+        <li><button type="button" data-go="n5"><span class="tm">19 h 30</span><span class="tt">Service du soir</span><span class="sk">Un problème complet, sans guide</span></button></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- Service 1 -->
+<section class="level" id="n1" data-n="1">
+  <div class="in">
+    <div class="lvl-head">
+      <p class="clock">7 h 30</p>
+      <div><p class="kick">Service 1 sur 5</p><h2>Mise en place</h2></div>
+    </div>
+    <div class="lvl-body">
+      <p class="say"><span class="who">Inès</span>Bienvenue à bord. Ce matin, je vérifie mes recettes. Dans une cuisine comme dans une réaction chimique, rien ne disparaît en route : tout ce qui entre ressort quelque part.</p>
+      <p>Un sandwich se prépare avec 2 tranches de pain et 1 steak. Si tu en fais 3, il te faut 6 tranches et 3 steaks, ni plus ni moins. En chimie, les atomes jouent le rôle des ingrédients. Une équation est équilibrée quand on retrouve les mêmes atomes, en même nombre, avant et après la réaction.</p>
+      <div class="goal"><span class="tag">Objectif</span><p>Ajuster les nombres stœchiométriques (les coefficients devant les formules) pour que chaque élément soit présent en même quantité à gauche et à droite.</p></div>
+      <ol class="rule-list">
+        <li>Compte les atomes de chaque élément à gauche, puis à droite.</li>
+        <li>Modifie un coefficient. Ne change jamais un petit chiffre dans une formule : {H2O} ne devient jamais {H2O2}.</li>
+        <li>Garde les plus petits nombres entiers possibles.</li>
+      </ol>
+      <div id="l1-tickets"></div>
+      <div class="recap" hidden><span class="tag">À retenir</span><p>Une équation de réaction est équilibrée quand chaque élément est présent en même quantité des deux côtés. On ajuste les coefficients, jamais les formules.</p></div>
+      <div class="next" hidden><button class="btn" type="button" data-go="n2">Passer au service de 10 h 00</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- Service 2 -->
+<section class="level" id="n2" data-n="2">
+  <div class="in">
+    <div class="lvl-head">
+      <p class="clock">10 h 00</p>
+      <div><p class="kick">Service 2 sur 5</p><h2>Les portions</h2></div>
+    </div>
+    <p class="lock-note" hidden>Termine le service de 7 h 30 pour ouvrir celui-ci.</p>
+    <div class="lvl-body">
+      <p class="say"><span class="who">Inès</span>Bien joué. Maintenant on prépare les portions. Ma recette ne change jamais, c'est le nombre de fois que je la répète qui varie.</p>
+      <p>La combustion du méthane suit la recette {CH4} + 2 {O2} → {CO2} + 2 {H2O}. Les coefficients indiquent combien de moles de chaque espèce interviennent à chaque répétition. On note <i>x</i> le nombre de répétitions, en moles : c'est l'avancement de la réaction.</p>
+      <div class="goal"><span class="tag">Objectif</span><p>Utiliser les coefficients pour relier la quantité de matière d'une espèce à celle d'une autre dans la même réaction.</p></div>
+      <div class="lab">
+        <label for="x2">Nombre de répétitions de la recette, <i>x</i></label>
+        <input type="range" id="x2" min="0" max="6" step="1" value="2"><output for="x2" id="x2out"></output>
+        <div id="l2-bars" style="margin-top:.8rem"></div>
+        <p class="legend"><b style="background:var(--accent)"></b>réactif consommé <b style="background:var(--signal);margin-left:.8rem"></b>produit formé</p>
+        <p class="food" id="l2-food"></p>
+      </div>
+      <h3>À toi de calculer</h3>
+      <div id="l2q"></div>
+      <div class="recap" hidden><span class="tag">À retenir</span><p>Les quantités de matière consommées ou formées sont proportionnelles aux nombres stœchiométriques. Si la réaction a lieu <i>x</i> fois, une espèce de coefficient <i>c</i> varie de <i>c</i> × <i>x</i>.</p></div>
+      <div class="next" hidden><button class="btn" type="button" data-go="n3">Passer au service de 12 h 15</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- Service 3 -->
+<section class="level" id="n3" data-n="3">
+  <div class="in">
+    <div class="lvl-head">
+      <p class="clock">12 h 15</p>
+      <div><p class="kick">Service 3 sur 5</p><h2>Rupture de stock</h2></div>
+    </div>
+    <p class="lock-note" hidden>Termine le service de 10 h 00 pour ouvrir celui-ci.</p>
+    <div class="lvl-body">
+      <p class="say"><span class="who">Inès</span>C'est le coup de feu, et il n'y a plus de pain. Il reste des steaks, mais sans pain ils ne servent à rien.</p>
+      <div class="goal"><span class="tag">Objectif</span><p>Identifier le réactif limitant, déterminer l'avancement maximal <i>x</i><sub>max</sub> et décrire l'état final avec un tableau d'avancement.</p></div>
+      <h3>D'abord en cuisine</h3>
+      <p>Dans la réserve : 8 tranches de pain et 5 steaks. Une recette : 2 tranches de pain + 1 steak → 1 sandwich.</p>
+      <div id="l3a"></div>
+      <h3>Puis en chimie</h3>
+      <p>La pile à hydrogène du camion reçoit 5,0 mol de {H2} et 3,0 mol de {O2}. La réaction s'écrit :</p>
+      <div class="lab">
+        <p class="rx">2 {H2} + {O2} → 2 {H2O}</p>
+        <label for="x3">Avancement <i>x</i> (en mol)</label>
+        <input type="range" id="x3" min="0" max="3.5" step="0.5" value="0"><output for="x3" id="x3out"></output>
+        <div class="tw" id="l3-table"></div>
+        <p class="fb info" id="l3-note"></p>
+      </div>
+      <p>Déplace le curseur : la réaction avance jusqu'à ce qu'un réactif soit épuisé. Ce réactif est le <b>réactif limitant</b>, et la valeur de <i>x</i> à cet instant est l'avancement maximal <i>x</i><sub>max</sub>.</p>
+      <div id="l3b"></div>
+      <div class="recap" hidden><span class="tag">À retenir</span><p>Le réactif limitant est celui qui s'épuise en premier. Pour le trouver, on cherche la valeur de <i>x</i> qui annule chaque réactif : la plus petite est <i>x</i><sub>max</sub>. Le tableau d'avancement donne la composition du système pour n'importe quelle valeur de <i>x</i>.</p></div>
+      <div class="next" hidden><button class="btn" type="button" data-go="n4">Passer au service de 15 h 00</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- Service 4 -->
+<section class="level" id="n4" data-n="4">
+  <div class="in">
+    <div class="lvl-head">
+      <p class="clock">15 h 00</p>
+      <div><p class="kick">Service 4 sur 5</p><h2>La balance</h2></div>
+    </div>
+    <p class="lock-note" hidden>Termine le service de 12 h 15 pour ouvrir celui-ci.</p>
+    <div class="lvl-body">
+      <p class="say"><span class="who">Inès</span>Mon fournisseur vend le gaz en grammes, pas en moles. Il faut savoir passer des unes aux autres.</p>
+      <p>La masse molaire <i>M</i> est la masse d'une mole d'entités chimiques. Elle relie la masse <i>m</i> et la quantité de matière <i>n</i> :</p>
+      <p style="font-family:var(--f-mono);font-size:1.15rem"><i>n</i> = <i>m</i> / <i>M</i> &nbsp;&nbsp; et &nbsp;&nbsp; <i>m</i> = <i>n</i> × <i>M</i></p>
+      <div class="goal"><span class="tag">Objectif</span><p>Convertir une masse en quantité de matière (et l'inverse), puis combiner cette conversion avec les coefficients de l'équation.</p></div>
+      <div class="lab">
+        <p style="margin:0;font-weight:700">Masses molaires utiles</p>
+        <ul class="molar">
+          <li>{CH4} <b>16,0</b> g/mol</li><li>{O2} <b>32,0</b> g/mol</li><li>{CO2} <b>44,0</b> g/mol</li><li>{H2O} <b>18,0</b> g/mol</li>
+        </ul>
+      </div>
+      <p>Essai de la bouteille : on brûle complètement <b>64 g</b> de méthane dans du dioxygène en excès.</p>
+      <p class="rx">{CH4} + 2 {O2} → {CO2} + 2 {H2O}</p>
+      <div id="l4q"></div>
+      <div id="l4-balance" class="lab" hidden>
+        <p style="margin:0;font-weight:700">La masse se conserve</p>
+        <svg class="scale" viewBox="0 0 320 120" role="img" aria-label="Une balance en équilibre : 320 grammes de chaque côté">
+          <rect class="s-ink" x="40" y="36" width="240" height="6" rx="2"/>
+          <polygon class="s-ink" points="160,42 148,106 172,106"/>
+          <rect class="s-ink" x="125" y="106" width="70" height="6" rx="2"/>
+          <path class="s-line" d="M80 42 L46 72 M80 42 L114 72 M240 42 L206 72 M240 42 L274 72"/>
+          <rect class="s-pan" x="40" y="72" width="80" height="6" rx="2"/>
+          <rect class="s-pan" x="200" y="72" width="80" height="6" rx="2"/>
+          <text class="s-text" x="80" y="96" text-anchor="middle">320 g</text>
+          <text class="s-text" x="240" y="96" text-anchor="middle">320 g</text>
+        </svg>
+        <div class="bal">
+          <div><p class="cap" style="margin-top:.2rem">Avant la réaction</p><p class="m">64 g + 256 g = 320 g</p></div>
+          <div><p class="cap" style="margin-top:.2rem">Après la réaction</p><p class="m">176 g + 144 g = 320 g</p></div>
+        </div>
+        <p style="margin:.8rem 0 0">Les 256 g de dioxygène sont les 8,0 mol consommées multipliées par 32,0 g/mol. Les molécules changent, la masse totale reste la même.</p>
+      </div>
+      <div class="recap" hidden><span class="tag">À retenir</span><p>Pour passer de la masse d'une espèce à celle d'une autre : masse → quantité de matière (<i>n</i> = <i>m</i> / <i>M</i>), puis coefficients de l'équation, puis quantité de matière → masse (<i>m</i> = <i>n</i> × <i>M</i>). La masse totale se conserve.</p></div>
+      <div class="next" hidden><button class="btn" type="button" data-go="n5">Passer au service de 19 h 30</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- Service 5 -->
+<section class="level" id="n5" data-n="5">
+  <div class="in">
+    <div class="lvl-head">
+      <p class="clock">19 h 30</p>
+      <div><p class="kick">Service 5 sur 5</p><h2>Service du soir</h2></div>
+    </div>
+    <p class="lock-note" hidden>Termine le service de 15 h 00 pour ouvrir celui-ci.</p>
+    <div class="lvl-body">
+      <p class="say"><span class="who">Inès</span>La file est longue et je n'ai plus le temps de te tenir la main. Voici la commande : à toi de jouer.</p>
+      <div class="goal"><span class="tag">Objectif</span><p>Mener seul un calcul complet : quantités initiales, réactif limitant, avancement maximal, puis masse produite et masse restante.</p></div>
+      <p>Les masses ci-dessous sont placées dans la plaque à gaz. La combustion se poursuit jusqu'à l'épuisement d'un réactif.</p>
+      <p class="rx">{CH4} + 2 {O2} → {CO2} + 2 {H2O}</p>
+      <p style="font-family:var(--f-mono);font-size:.95rem;margin:0 0 .5rem"><i>M</i>({CH4}) = 16,0 · <i>M</i>({O2}) = 32,0 · <i>M</i>({CO2}) = 44,0 · <i>M</i>({H2O}) = 18,0 g/mol</p>
+      <div id="l5-order" class="ticket"></div>
+      <details class="help"><summary>Un rappel de méthode</summary>
+        <ol class="rule-list">
+          <li>Calcule la quantité de matière initiale de chaque réactif avec <i>n</i> = <i>m</i> / <i>M</i>.</li>
+          <li>Pour chaque réactif, cherche la valeur de <i>x</i> qui l'épuise. La plus petite est <i>x</i><sub>max</sub>.</li>
+          <li>Utilise <i>x</i><sub>max</sub> pour obtenir les quantités finales, puis convertis en masse avec <i>m</i> = <i>n</i> × <i>M</i>.</li>
+        </ol>
+      </details>
+      <div id="l5q"></div>
+      <div id="l5-table" hidden>
+        <h3>Ton tableau d'avancement</h3>
+        <div class="tw" id="l5-tw"></div>
+      </div>
+      <p class="sparse"><button class="btn ghost" type="button" id="l5-new">Nouvelle commande</button></p>
+      <div class="recap" hidden><span class="tag">À retenir</span><p>Un problème de stœchiométrie suit toujours le même chemin : masses → quantités de matière → réactif limitant et <i>x</i><sub>max</sub> → composition finale → masses.</p></div>
+      <div class="next" hidden><button class="btn" type="button" data-go="fin">Voir l'addition</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="fin" id="fin" hidden>
+  <div class="in">
+    <p class="kick">Fin de service</p>
+    <h2>Le poste est à toi</h2>
+    <p class="say"><span class="who">Inès</span>Tu sais équilibrer, proportionner, trouver le réactif limitant et passer par la balance. Demain, 7 h 30, on recommence avec d'autres recettes.</p>
+    <div class="receipt">
+      <p class="r-head">La Mole Gourmande · Addition</p>
+      <ul>
+        <li><span>Équilibrer une équation</span><span class="lead"></span><b>acquis</b></li>
+        <li><span>Proportions entre espèces</span><span class="lead"></span><b>acquis</b></li>
+        <li><span>Réactif limitant</span><span class="lead"></span><b>acquis</b></li>
+        <li><span>Masses et moles</span><span class="lead"></span><b>acquis</b></li>
+        <li><span>Problème complet</span><span class="lead"></span><b>acquis</b></li>
+      </ul>
+      <p class="r-foot">Merci de votre visite</p>
+    </div>
+    <button class="btn ghost" type="button" id="again">Rejouer depuis le début</button>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="in">
+    <label for="all"><input type="checkbox" id="all"> Mode enseignant : tout débloquer</label>
+    <button class="link" type="button" id="reset">Effacer ma progression</button>
+  </div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var chem=function(s){return String(s).replace(/([A-Za-z\)])(\d+)/g,'$1<sub>$2</sub>')};
+var rich=function(s){return chem(String(s).replace(/\{([^{}<>]+)\}/g,function(m,f){return '<span class="f">'+chem(f)+'</span>'}))};
+var num=function(n){return String(+(+n).toFixed(2)).replace('.',',')};
+var parseNum=function(v){var x=parseFloat(String(v).trim().replace(',','.'));return isFinite(x)?x:null};
+var el=function(tag,cls,html){var e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e};
+var RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Formules écrites entre accolades dans le texte statique */
+var main=$('#main');
+main.innerHTML=main.innerHTML.replace(/\{([^{}<>]+)\}/g,function(m,f){return '<span class="f">'+chem(f)+'</span>'});
+
+/* Progression */
+var KEY='mole-gourmande-v1';
+var state={done:[],all:false};
+try{var s0=JSON.parse(localStorage.getItem(KEY));if(s0&&Array.isArray(s0.done)){state={done:s0.done,all:!!s0.all}}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+function isDone(n){return state.done.indexOf(n)>-1}
+function isUnlocked(n){return state.all||n===1||isDone(n-1)}
+function go(id){var t=document.getElementById(id);if(t)t.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}
+
+function refresh(){
+  for(var n=1;n<=5;n++){
+    var sec=$('#n'+n),u=isUnlocked(n),d=isDone(n);
+    $('.lvl-body',sec).hidden=!u;
+    var ln=$('.lock-note',sec);if(ln)ln.hidden=u;
+    $('.recap',sec).hidden=!d;
+    $('.next',sec).hidden=!d;
+  }
+  $('#fin').hidden=!isDone(5);
+  $$('.pip').forEach(function(p,i){
+    var n=i+1;
+    p.classList.toggle('is-done',isDone(n));
+    p.classList.toggle('is-locked',!isUnlocked(n));
+    p.textContent=isDone(n)?'✓':String(n);
+    p.setAttribute('aria-label','Service '+n+(isDone(n)?', terminé':(!isUnlocked(n)?', verrouillé':'')));
+  });
+  $$('#carte li').forEach(function(li,i){li.classList.toggle('is-done',isDone(i+1))});
+  $('#prog').textContent=state.done.length+' / 5';
+  $('#all').checked=state.all;
+}
+function complete(n){
+  var was=isDone(n);
+  if(!was){state.done.push(n);save()}
+  refresh();
+  if(!was){var r=$('#n'+n+' .recap');if(r&&!r.hidden)r.scrollIntoView({behavior:RM?'auto':'smooth',block:'nearest'})}
+}
+
+/* Questions */
+var qid=0;
+function buildQ(q,onDone){
+  var wrap=el('div','q');
+  var pid='q'+(++qid);
+  var tx=el('p','q-text',rich(q.text));tx.id=pid;wrap.appendChild(tx);
+  var fb=el('p','fb');fb.setAttribute('role','status');fb.setAttribute('aria-live','polite');
+  var tries=0,done=false,input=null,btn=null;
+  var ansText=q.type==='choice'?chem(q.answer):num(q.ans)+(q.unit?' '+q.unit:'');
+  function ok(seen){
+    done=true;wrap.classList.add('is-done');
+    if(input){input.disabled=true}
+    if(btn){btn.disabled=true}
+    $$('.opt',wrap).forEach(function(b){b.disabled=true});
+    fb.className='fb '+(seen?'info':'ok');
+    fb.innerHTML=(seen?'Réponse attendue : '+ansText+'. ':'Exact. ')+rich(q.explain||'');
+    onDone();
+  }
+  function wrong(diag){
+    tries++;
+    if(tries>=3){ok(true);return}
+    fb.className='fb bad';
+    fb.innerHTML=rich(diag||q.hints[Math.min(tries-1,q.hints.length-1)]);
+  }
+  if(q.type==='choice'){
+    var opts=el('div','opts');
+    q.options.forEach(function(o){
+      var b=el('button','opt',chem(o));b.type='button';
+      b.addEventListener('click',function(){if(done)return;if(o===q.answer)ok(false);else wrong(q.diag?q.diag(o):null)});
+      opts.appendChild(b);
+    });
+    wrap.appendChild(opts);
+  }else{
+    var row=el('div','qrow');
+    input=el('input','inp');input.type='text';input.setAttribute('inputmode','decimal');input.autocomplete='off';
+    input.setAttribute('aria-labelledby',pid);
+    var unit=el('span','unit',q.unit||'');
+    btn=el('button','btn','Vérifier');btn.type='button';
+    var check=function(){
+      if(done)return;
+      var v=parseNum(input.value);
+      if(v===null){fb.className='fb bad';fb.textContent='Écris un nombre, par exemple 2,5.';return}
+      if(Math.abs(v-q.ans)<=(q.tol!=null?q.tol:0.02))ok(false);
+      else wrong(q.diag?q.diag(v):null);
+    };
+    btn.addEventListener('click',check);
+    input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();check()}});
+    row.appendChild(input);row.appendChild(unit);row.appendChild(btn);
+    wrap.appendChild(row);
+  }
+  wrap.appendChild(fb);
+  return wrap;
+}
+function questions(root,list,opt){
+  opt=opt||{};
+  root.innerHTML='';
+  var left=list.length,rows=[];
+  list.forEach(function(q,i){
+    var w=buildQ(q,function(){
+      left--;
+      if(opt.sequential&&rows[i+1])rows[i+1].hidden=false;
+      if(left===0&&opt.onAllDone)opt.onAllDone();
+    });
+    if(opt.sequential&&i>0)w.hidden=true;
+    rows.push(w);root.appendChild(w);
+  });
+}
+
+/* Tableau d'avancement */
+function tableHTML(t){
+  var rows=t.rows||['init','expr','val','final'];
+  var val=function(s,x){return s.role==='R'?s.n0-s.c*x:s.n0+s.c*x};
+  var co=function(c){return c>1?c:''};
+  var h='<table class="av"><thead><tr><th scope="col"><span class="f">Équation</span></th>'+t.sp.map(function(s){
+    return '<th scope="col" class="'+s.role+'">'+(s.c>1?s.c+' ':'')+chem(s.f)+'<small>'+(s.role==='R'?'réactif':'produit')+'</small></th>';
+  }).join('')+'</tr></thead><tbody>';
+  if(rows.indexOf('init')>-1)h+='<tr><th scope="row">État initial<small><i>x</i> = 0</small></th>'+t.sp.map(function(s){return '<td>'+num(s.n0)+'</td>'}).join('')+'</tr>';
+  if(rows.indexOf('expr')>-1)h+='<tr><th scope="row">En cours<small>expression</small></th>'+t.sp.map(function(s){
+    var e=s.role==='R'?num(s.n0)+' − '+co(s.c)+'<i>x</i>':(s.n0?num(s.n0)+' + ':'')+co(s.c)+'<i>x</i>';
+    return '<td>'+e+'</td>';
+  }).join('')+'</tr>';
+  if(rows.indexOf('val')>-1)h+='<tr><th scope="row">En cours<small><i>x</i> = '+num(t.x)+' mol</small></th>'+t.sp.map(function(s){
+    var v=val(s,t.x),neg=v<-1e-9;
+    return '<td class="'+(neg?'neg':'')+'">'+(neg?num(v)+'<small>impossible</small>':num(Math.abs(v)<1e-9?0:v))+'</td>';
+  }).join('')+'</tr>';
+  if(rows.indexOf('final')>-1)h+='<tr class="fin"><th scope="row">État final<small><i>x</i><sub>max</sub> = '+(t.showFinal?num(t.xmax)+' mol':'?')+'</small></th>'+t.sp.map(function(s){
+    return '<td>'+(t.showFinal?num(val(s,t.xmax)):'?')+'</td>';
+  }).join('')+'</tr>';
+  return h+'</tbody></table>';
+}
+
+/* Service 1 */
+var SP={H2:{H:2},O2:{O:2},H2O:{H:2,O:1},CH4:{C:1,H:4},CO2:{C:1,O:2},C3H8:{C:3,H:8}};
+var EQS=[
+  {title:'La pile à hydrogène du camion',R:['H2','O2'],P:['H2O']},
+  {title:'La plaque à gaz (méthane)',R:['CH4','O2'],P:['CO2','H2O']},
+  {title:'La bonbonne de propane',R:['C3H8','O2'],P:['CO2','H2O']}
+];
+var ORDER=['C','H','O'];
+function gcd(a,b){return b?gcd(b,a%b):a}
+function initL1(){
+  var root=$('#l1-tickets');root.innerHTML='';
+  var balanced={};
+  EQS.forEach(function(eq,idx){
+    var sp=eq.R.concat(eq.P),nR=eq.R.length,c=sp.map(function(){return 1});
+    var card=el('article','ticket');
+    card.innerHTML='<div class="t-head"><span>Bon '+(idx+1)+'</span><span>'+eq.title+'</span></div><div class="eq"></div><p class="cap">Atomes de chaque élément, à gauche et à droite</p><div class="tally"></div><p class="fb" role="status" aria-live="polite"></p><span class="stamp" hidden>Équilibrée</span>';
+    var eqRow=$('.eq',card),tally=$('.tally',card),fb=$('.fb',card),stamp=$('.stamp',card);
+    sp.forEach(function(f,i){
+      if(i===nR)eqRow.appendChild(el('span','op','→'));
+      else if(i>0)eqRow.appendChild(el('span','op','+'));
+      var g=el('span','sp');
+      g.innerHTML='<button type="button" class="step" data-i="'+i+'" data-d="-1" aria-label="Diminuer le coefficient de '+f+'">−</button><output class="coef" aria-live="polite">1</output><button type="button" class="step" data-i="'+i+'" data-d="1" aria-label="Augmenter le coefficient de '+f+'">+</button><span class="formula">'+chem(f)+'</span>';
+      eqRow.appendChild(g);
+    });
+    function update(){
+      var L={},Rr={};
+      sp.forEach(function(f,i){
+        var side=i<nR?L:Rr;
+        Object.keys(SP[f]).forEach(function(e){side[e]=(side[e]||0)+c[i]*SP[f][e]});
+      });
+      var els=Object.keys(L).concat(Object.keys(Rr)).filter(function(e,i,a){return a.indexOf(e)===i}).sort(function(a,b){return ORDER.indexOf(a)-ORDER.indexOf(b)});
+      tally.innerHTML=els.map(function(e){
+        var a=L[e]||0,b=Rr[e]||0;
+        return '<span class="at '+(a===b?'ok':'bad')+'"><b>'+e+'</b>'+a+' '+(a===b?'=':'≠')+' '+b+'</span>';
+      }).join('');
+      $$('.coef',card).forEach(function(o,i){o.textContent=c[i]});
+      var bal=els.every(function(e){return (L[e]||0)===(Rr[e]||0)});
+      var g=c.reduce(gcd);
+      var good=bal&&g===1;
+      if(good){
+        fb.className='fb ok';fb.textContent='Les atomes sont conservés : cette équation est équilibrée.';
+        stamp.hidden=false;
+      }else if(bal){
+        fb.className='fb info';fb.textContent='Les atomes sont conservés, mais tu peux diviser tous les coefficients pour garder les plus petits nombres entiers.';
+        stamp.hidden=true;
+      }else{
+        var bad=els.filter(function(e){return (L[e]||0)!==(Rr[e]||0)})[0];
+        var a2=L[bad]||0,b2=Rr[bad]||0;
+        fb.className='fb bad';
+        fb.innerHTML='Il y a '+a2+' atome'+(a2>1?'s':'')+' de '+bad+' à gauche et '+b2+' à droite. Change le coefficient d\'une espèce qui contient '+bad+'.';
+        stamp.hidden=true;
+      }
+      if(good){balanced[idx]=true}else{delete balanced[idx]}
+      if(Object.keys(balanced).length===EQS.length&&!isDone(1))complete(1);
+    }
+    card.addEventListener('click',function(e){
+      var b=e.target.closest('.step');if(!b)return;
+      var i=+b.dataset.i,d=+b.dataset.d;
+      c[i]=Math.max(1,Math.min(9,c[i]+d));
+      update();
+    });
+    root.appendChild(card);
+    update0();
+    function update0(){
+      /* état initial sans déclencher la validation */
+      var L={},Rr={};
+      sp.forEach(function(f,i){var side=i<nR?L:Rr;Object.keys(SP[f]).forEach(function(e){side[e]=(side[e]||0)+c[i]*SP[f][e]})});
+      var els=Object.keys(L).concat(Object.keys(Rr)).filter(function(e,i,a){return a.indexOf(e)===i}).sort(function(a,b){return ORDER.indexOf(a)-ORDER.indexOf(b)});
+      tally.innerHTML=els.map(function(e){var a=L[e]||0,b=Rr[e]||0;return '<span class="at '+(a===b?'ok':'bad')+'"><b>'+e+'</b>'+a+' '+(a===b?'=':'≠')+' '+b+'</span>'}).join('');
+    }
+  });
+}
+
+/* Service 2 */
+function renderL2(){
+  var x=parseInt($('#x2').value,10);
+  $('#x2out').innerHTML='<i>x</i> = '+x+' mol';
+  var rows=[['CH4',1,'R'],['O2',2,'R'],['CO2',1,'P'],['H2O',2,'P']];
+  $('#l2-bars').innerHTML=rows.map(function(r){
+    var v=r[1]*x;
+    return '<div class="brow"><span>n('+chem(r[0])+')</span><span class="track"><span class="fill '+r[2]+'" style="width:'+(v/12*100)+'%"></span></span><span class="bval">'+num(v)+' mol</span></div>';
+  }).join('');
+  $('#l2-food').innerHTML='Même logique en cuisine, avec <b>'+x+'</b> sandwich'+(x>1?'s':'')+' : '+(2*x)+' tranche'+(2*x>1?'s':'')+' de pain et '+x+' steak'+(x>1?'s':'')+'.';
+}
+function initL2(){
+  var sl=$('#x2');sl.value=2;sl.oninput=renderL2;renderL2();
+  questions($('#l2q'),[
+    {text:'On brûle 3,0 mol de {CH4}. Quelle quantité de {O2} est consommée ?',ans:6,unit:'mol',
+     hints:['Regarde les coefficients : pour 1 {CH4}, il faut 2 {O2}.','La recette est répétée 3 fois, donc il faut 3 × 2 {O2}.'],
+     diag:function(v){return Math.abs(v-3)<.01?'Tu as recopié la quantité de {CH4}. Regarde le coefficient de {O2} dans l\'équation.':null},
+     explain:'Chaque {CH4} consomme 2 {O2} : 3,0 × 2 = 6,0 mol.'},
+    {text:'Dans la même transformation (3,0 mol de {CH4}), quelle quantité de {H2O} se forme ?',ans:6,unit:'mol',
+     hints:['Le coefficient de {H2O} est 2.','Pour 3 répétitions, 3 × 2 {H2O}.'],
+     explain:'2 {H2O} pour chaque {CH4} : 3,0 × 2 = 6,0 mol.'},
+    {text:'On veut former 10 mol de {H2O}. Quelle quantité de {CH4} faut-il brûler ?',ans:5,unit:'mol',
+     hints:['2 {H2O} se forment pour 1 {CH4} : il faut donc moins de {CH4} que de {H2O}.','Divise 10 par le coefficient de {H2O}.'],
+     diag:function(v){return Math.abs(v-20)<.01?'Tu as multiplié par 2. Ici on connaît le produit et on cherche le réactif : on divise.':null},
+     explain:'10 / 2 = 5,0 mol de {CH4}.'},
+    {text:'Le méthane brûle en consommant 8 mol de {O2}. Quelle quantité de {CO2} est formée ?',ans:4,unit:'mol',
+     hints:['2 {O2} sont consommés pour 1 {CO2} formé.','Divise 8 par 2.'],
+     explain:'1 {CO2} pour 2 {O2} : 8 / 2 = 4,0 mol.'}
+  ],{onAllDone:function(){if(!isDone(2))complete(2)}});
+}
+
+/* Service 3 */
+var L3SP=[{f:'H2',c:2,n0:5,role:'R'},{f:'O2',c:1,n0:3,role:'R'},{f:'H2O',c:2,n0:0,role:'P'}];
+var L3final=false;
+function renderL3(){
+  var x=parseFloat($('#x3').value);
+  $('#x3out').innerHTML='<i>x</i> = '+num(x)+' mol';
+  $('#l3-table').innerHTML=tableHTML({sp:L3SP,x:x,xmax:2.5,showFinal:L3final});
+  var neg=L3SP.some(function(s){return s.role==='R'&&s.n0-s.c*x<-1e-9});
+  var zero=L3SP.some(function(s){return s.role==='R'&&Math.abs(s.n0-s.c*x)<1e-9});
+  var note=$('#l3-note');
+  note.className='fb info';
+  note.textContent=neg?'Une quantité de matière ne peut pas être négative : cette valeur de x est impossible.':(zero?'Un réactif est épuisé : la transformation s\'arrête ici.':'Augmente x pour faire avancer la réaction.');
+}
+function initL3(){
+  L3final=false;
+  var sl=$('#x3');sl.value=0;sl.oninput=renderL3;renderL3();
+  var parts=0;
+  var part=function(){parts++;if(parts===2&&!isDone(3))complete(3)};
+  questions($('#l3a'),[
+    {type:'choice',text:'Quel ingrédient manque en premier ?',options:['Pain','Steak'],answer:'Pain',
+     hints:['Compare : combien de sandwichs permettent 8 tranches de pain ? Et 5 steaks ?'],
+     explain:'Avec 8 tranches on fait 4 sandwichs, avec 5 steaks on pourrait en faire 5. Le pain s\'épuise le premier.'},
+    {text:'Combien de sandwichs peux-tu préparer au maximum ?',ans:4,unit:'sandwichs',
+     hints:['Chaque sandwich demande 2 tranches de pain.','Divise le nombre de tranches par 2.'],
+     explain:'8 / 2 = 4 sandwichs.'},
+    {text:'Combien de steaks restent après avoir préparé ces sandwichs ?',ans:1,unit:'steak',
+     hints:['Chaque sandwich utilise 1 steak.','5 steaks au départ, moins ceux utilisés.'],
+     explain:'5 − 4 = 1 steak.'}
+  ],{sequential:true,onAllDone:part});
+  questions($('#l3b'),[
+    {type:'choice',text:'Quel est le réactif limitant ?',options:['H2','O2'],answer:'H2',
+     hints:['Cherche, pour chaque réactif, la valeur de x qui l\'annule : 5,0 − 2x = 0 et 3,0 − x = 0.','Le réactif limitant est celui qui s\'épuise pour la plus petite valeur de x.'],
+     explain:'{H2} s\'épuise pour x = 2,5 mol, {O2} pour x = 3,0 mol. {H2} s\'épuise le premier.'},
+    {text:'Quelle est la valeur de l\'avancement maximal x<sub>max</sub> ?',ans:2.5,unit:'mol',
+     hints:['x<sub>max</sub> est la plus petite des deux valeurs de x qui annulent un réactif.','Résous 5,0 − 2x = 0.'],
+     diag:function(v){return Math.abs(v-3)<.01?'3,0 mol épuiserait {O2}, mais {H2} deviendrait négatif. Il faut garder la plus petite valeur.':null},
+     explain:'5,0 − 2x<sub>max</sub> = 0 donc x<sub>max</sub> = 2,5 mol.'},
+    {text:'Quelle quantité de {O2} reste-t-il à la fin ?',ans:0.5,unit:'mol',
+     hints:['Utilise la ligne « En cours » du tableau avec x = x<sub>max</sub>.','n({O2}) final = 3,0 − x<sub>max</sub>.'],
+     diag:function(v){return Math.abs(v-3)<.01?'3,0 mol est la quantité initiale. Retire ce qui a été consommé.':null},
+     explain:'3,0 − 2,5 = 0,5 mol de {O2} en excès. Il se forme 5,0 mol de {H2O}.'}
+  ],{onAllDone:function(){L3final=true;renderL3();part()}});
+}
+
+/* Service 4 */
+function initL4(){
+  $('#l4-balance').hidden=true;
+  questions($('#l4q'),[
+    {text:'Quelle quantité de matière de {CH4} représentent 64 g ?',ans:4,unit:'mol',
+     hints:['Utilise <i>n</i> = <i>m</i> / <i>M</i>, avec <i>M</i>({CH4}) = 16,0 g/mol.','Divise 64 par 16,0.'],
+     diag:function(v){return Math.abs(v-1024)<1?'Tu as multiplié. Pour obtenir une quantité de matière, on divise la masse par la masse molaire.':null},
+     explain:'<i>n</i> = 64 / 16,0 = 4,0 mol.'},
+    {text:'Quelle quantité de {O2} est consommée ?',ans:8,unit:'mol',
+     hints:['D\'après l\'équation, 2 {O2} sont consommés pour 1 {CH4}.','Multiplie la quantité de {CH4} par 2.'],
+     explain:'4,0 × 2 = 8,0 mol.'},
+    {text:'Quelle masse de {CO2} se forme ?',ans:176,unit:'g',tol:.5,
+     hints:['1 {CH4} donne 1 {CO2} : <i>n</i>({CO2}) = 4,0 mol. Il reste à convertir en grammes.','<i>m</i> = <i>n</i> × <i>M</i>, avec <i>M</i>({CO2}) = 44,0 g/mol.'],
+     diag:function(v){return Math.abs(v-4)<.05?'4,0 mol est la quantité de matière de {CO2}. Convertis-la en grammes avec <i>m</i> = <i>n</i> × <i>M</i>.':null},
+     explain:'<i>m</i> = 4,0 × 44,0 = 176 g.'},
+    {text:'Quelle masse de {H2O} se forme ?',ans:144,unit:'g',tol:.5,
+     hints:['2 {H2O} se forment pour 1 {CH4} : <i>n</i>({H2O}) = 8,0 mol.','<i>m</i> = <i>n</i> × <i>M</i>, avec <i>M</i>({H2O}) = 18,0 g/mol.'],
+     diag:function(v){return Math.abs(v-72)<.5?'Il y a 2 {H2O} pour 1 {CH4} : la quantité de matière est 8,0 mol, pas 4,0 mol.':null},
+     explain:'<i>m</i> = 8,0 × 18,0 = 144 g.'},
+    {text:'Quelle est la masse totale des produits ({CO2} et {H2O}) ?',ans:320,unit:'g',tol:.5,
+     hints:['Additionne les deux masses obtenues.'],
+     explain:'176 + 144 = 320 g.'}
+  ],{sequential:true,onAllDone:function(){$('#l4-balance').hidden=false;if(!isDone(4))complete(4)}});
+}
+
+/* Service 5 */
+var order=null;
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function makeOrder(){
+  var A=[1,1.5,2,2.5,3],B=[1,2,3,4,5,6,7],a,b;
+  do{a=pick(A);b=pick(B)}while(Math.abs(b-2*a)<1e-9);
+  return {a:a,b:b,mC:a*16,mO:b*32,no:300+Math.floor(Math.random()*99)};
+}
+function initL5(){order=makeOrder();renderL5()}
+function renderL5(){
+  var o=order,xmax=Math.min(o.a,o.b/2),lim=o.a<o.b/2?'CH4':'O2',exc=lim==='CH4'?'O2':'CH4';
+  var nExc=lim==='CH4'?o.b-2*xmax:o.a-xmax;
+  var mExc=nExc*(exc==='O2'?32:16);
+  var large=Math.max(o.a,o.b/2);
+  $('#l5-order').innerHTML='<div class="t-head"><span>Commande n° '+o.no+'</span><span>Plaque à gaz</span></div><dl class="ord"><div><dt>Méthane '+chem('CH4')+'</dt><dd>'+num(o.mC)+' g</dd></div><div><dt>Dioxygène '+chem('O2')+'</dt><dd>'+num(o.mO)+' g</dd></div></dl>';
+  $('#l5-table').hidden=true;
+  questions($('#l5q'),[
+    {text:'Quelle est la quantité de matière initiale de {CH4} ?',ans:o.a,unit:'mol',
+     hints:['<i>n</i> = <i>m</i> / <i>M</i>, avec <i>M</i>({CH4}) = 16,0 g/mol.','Divise '+num(o.mC)+' par 16,0.'],
+     explain:'<i>n</i> = '+num(o.mC)+' / 16,0 = '+num(o.a)+' mol.'},
+    {text:'Quelle est la quantité de matière initiale de {O2} ?',ans:o.b,unit:'mol',
+     hints:['<i>n</i> = <i>m</i> / <i>M</i>, avec <i>M</i>({O2}) = 32,0 g/mol.','Divise '+num(o.mO)+' par 32,0.'],
+     explain:'<i>n</i> = '+num(o.mO)+' / 32,0 = '+num(o.b)+' mol.'},
+    {type:'choice',text:'Quel est le réactif limitant ?',options:['CH4','O2'],answer:lim,
+     hints:['Pour chaque réactif, cherche la valeur de <i>x</i> qui l\'épuise : <i>n</i>({CH4}) − <i>x</i> = 0 et <i>n</i>({O2}) − 2<i>x</i> = 0.','Le réactif limitant correspond à la plus petite valeur de <i>x</i>.'],
+     explain:'{CH4} s\'épuise pour <i>x</i> = '+num(o.a)+' mol, {O2} pour <i>x</i> = '+num(o.b/2)+' mol. Le réactif limitant est {'+lim+'}.'},
+    {text:'Quelle est la valeur de l\'avancement maximal <i>x</i><sub>max</sub> ?',ans:xmax,unit:'mol',
+     hints:['<i>x</i><sub>max</sub> est la plus petite des deux valeurs qui annulent un réactif.','Compare '+num(o.a)+' et '+num(o.b/2)+'.'],
+     diag:function(v){return Math.abs(v-large)<.01&&large!==xmax?'Cette valeur épuiserait l\'autre réactif, mais le premier deviendrait négatif. Garde la plus petite.':null},
+     explain:'<i>x</i><sub>max</sub> = '+num(xmax)+' mol.'},
+    {text:'Quelle masse de {CO2} se forme à la fin ?',ans:xmax*44,unit:'g',tol:.5,
+     hints:['<i>n</i>({CO2}) = <i>x</i><sub>max</sub>, car son coefficient est 1.','<i>m</i> = <i>n</i> × <i>M</i>, avec <i>M</i>({CO2}) = 44,0 g/mol.'],
+     diag:function(v){return Math.abs(v-xmax)<.01?'C\'est la quantité de matière. Convertis-la en grammes avec <i>M</i>({CO2}) = 44,0 g/mol.':null},
+     explain:'<i>m</i> = '+num(xmax)+' × 44,0 = '+num(xmax*44)+' g.'},
+    {text:'Quelle masse du réactif en excès reste-t-il à la fin ?',ans:mExc,unit:'g',tol:.5,
+     hints:['Le réactif en excès est celui qui n\'est pas limitant. Calcule sa quantité de matière restante avec <i>x</i><sub>max</sub>.','Quantité restante = quantité initiale − coefficient × <i>x</i><sub>max</sub>, puis convertis en grammes.'],
+     explain:'Il reste '+num(nExc)+' mol de '+chem(exc)+', soit '+num(nExc)+' × '+(exc==='O2'?'32,0':'16,0')+' = '+num(mExc)+' g.'}
+  ],{onAllDone:function(){
+    var sp=[{f:'CH4',c:1,n0:o.a,role:'R'},{f:'O2',c:2,n0:o.b,role:'R'},{f:'CO2',c:1,n0:0,role:'P'},{f:'H2O',c:2,n0:0,role:'P'}];
+    $('#l5-tw').innerHTML=tableHTML({sp:sp,x:xmax,xmax:xmax,showFinal:true,rows:['init','expr','final']});
+    $('#l5-table').hidden=false;
+    if(!isDone(5))complete(5);
+  }});
+}
+
+/* Écouteurs généraux */
+document.addEventListener('click',function(e){
+  var t=e.target.closest('[data-go]');
+  if(t)go(t.getAttribute('data-go'));
+});
+$('#l5-new').addEventListener('click',function(){order=makeOrder();renderL5()});
+$('#all').addEventListener('change',function(e){state.all=e.target.checked;save();refresh()});
+function initAll(){initL1();initL2();initL3();initL4();initL5();refresh()}
+function resetAll(){state={done:[],all:state.all};save();initAll();window.scrollTo(0,0)}
+$('#reset').addEventListener('click',resetAll);
+$('#again').addEventListener('click',resetAll);
+
+initAll();
+})();
+</script>
+
+</body></html>
